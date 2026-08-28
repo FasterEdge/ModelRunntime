@@ -1,0 +1,4 @@
+numpy>=1.13.3  # BSD
+opencv-python==4.4.0.44
+tensorflow==1.15.4
+protobuf<3.21

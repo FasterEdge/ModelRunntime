@@ -1,0 +1,8 @@
+[package]
+name = "rust_tract"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tract-onnx = "0.21"
+tract-ndarray = "0.21"

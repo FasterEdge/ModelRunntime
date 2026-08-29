@@ -1,6 +1,6 @@
 {
   "name": "node_onnxruntime",
-  "version": "1.0.0",
+  "version": "1.0.20260829",
   "main": "index.js",
   "dependencies": {
     "onnxruntime-node": "^1.19.2"

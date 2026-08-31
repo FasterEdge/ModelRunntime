@@ -1,3 +1,4 @@
+// FasterEdge 开源项目 · https://github.com/FasterEdge · https://gitee.com/FasterEdge
 // TensorFlow Lite Go 推理示例（github.com/mattn/go-tflite）
 // 动态参数均用注释占位，按实际模型修改
 

@@ -1,6 +1,6 @@
 [package]
 name = "rust_ort"
-version = "1.0.20260831"
+version = "1.0.20260901"
 edition = "2021"
 
 [dependencies]

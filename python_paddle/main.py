@@ -1,3 +1,4 @@
+# FasterEdge 开源项目 - Github: https://github.com/FasterEdge - Gitee: https://gitee.com/FasterEdge
 # PaddlePaddle (.pdmodel) 模型推理示例
 # 动态参数均用注释占位，按实际模型修改
 

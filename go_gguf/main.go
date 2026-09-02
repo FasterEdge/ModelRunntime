@@ -1,3 +1,4 @@
+// FasterEdge 开源项目 - Github: https://github.com/FasterEdge - Gitee: https://gitee.com/FasterEdge
 // GGUF 大模型 Go 推理示例（配合 llama.cpp 的 llama-server / llama-cli）
 // 动态参数均用注释占位，按实际模型修改
 

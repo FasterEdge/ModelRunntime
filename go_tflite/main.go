@@ -10,7 +10,6 @@ import (
 	"time"
 
 	tflite "github.com/mattn/go-tflite"
-	"github.com/mattn/go-tflite/delegates/xnnpack"
 )
 
 func main() {
@@ -26,10 +25,9 @@ func main() {
 
 	options := tflite.NewInterpreterOptions()
 	defer options.Delete()
-	options.SetNumThread(4) // TODO: 按 CPU 核数调整
-	if d := xnnpack.New(options); d != nil { // TODO: XNNPACK 委派可选
-		defer d.Delete()
-	}
+	options.SetNumThread(4)                  // TODO: 按 CPU 核数调整
+	cleanupXNNPACK := enableXNNPACK(options) // TODO: XNNPACK 委派可选（Linux+cgo 生效）
+	defer cleanupXNNPACK()
 
 	interpreter := tflite.NewInterpreter(model, options)
 	if interpreter == nil {

@@ -1,8 +1,7 @@
-module go_tflite
+module github.com/FasterEdge/ModelRunntime/go_tflite
 
 go 1.21
 
-require (
-	github.com/mattn/go-tflite v0.0.0-20240318094818-ae5f60244bb4
-	github.com/mattn/go-tflite/delegates/xnnpack v0.0.0-20240318094818-ae5f60244bb4
-)
+require github.com/mattn/go-tflite v1.0.7
+
+require github.com/mattn/go-pointer v0.0.1 // indirect

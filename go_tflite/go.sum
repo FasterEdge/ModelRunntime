@@ -1,0 +1,4 @@
+github.com/mattn/go-pointer v0.0.1 h1:n+XhsuGeVO6MEAp7xyEukFINEa+Quek5psIR/ylA6o0=
+github.com/mattn/go-pointer v0.0.1/go.mod h1:2zXcozF6qYGgmsG+SeTZz3oAbFLdD3OWqnUbNvJZAlc=
+github.com/mattn/go-tflite v1.0.7 h1:yl2KALp6mSbEsjlgpMInGfsaEzOMwDGfeSfJ6pSecQk=
+github.com/mattn/go-tflite v1.0.7/go.mod h1:j7bVlVHgKURK0p7AQOw3OqlGE2SVXqck7JsJo4wI+bc=

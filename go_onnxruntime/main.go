@@ -42,7 +42,7 @@ func main() {
 
 	session, err := ort.NewAdvancedSession(
 		modelPath, []string{inputName}, []string{"output0"}, // TODO: 输出名
-		[]*ort.Tensor[float32]{inputTensor}, []*ort.Tensor[float32]{outputTensor}, nil)
+		[]ort.ArbitraryTensor{inputTensor}, []ort.ArbitraryTensor{outputTensor}, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

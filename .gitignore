@@ -52,3 +52,7 @@ temp/
 
 # Git worktrees
 .worktrees/
+# Go 构建产物 (go_gguf 等子项目)
+*.exe
+*.exe~
+

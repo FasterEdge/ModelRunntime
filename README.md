@@ -11,7 +11,7 @@
 | 目录 | 模型格式 | 运行库/框架 | 说明 |
 |------|----------|-------------|------|
 | [python_onnx](python_onnx/) | ONNX (`.onnx`) | onnxruntime | YOLOv5n 目标检测完整示例（含 NMS 与可视化） |
-| [python_pb](python_pb/) | TensorFlow 1.x (`.pb`) | tensorflow==1.15.4 | YOLOv3-ResNet18 目标检测，附 Dockerfile |
+| [python_pb](python_pb/) | TensorFlow (`.pb`) | tensorflow>=2.16 | YOLOv3-ResNet18 目标检测（tf.compat.v1 冻结图），附 Dockerfile |
 | [python_pth_pt](python_pth_pt/) | PyTorch (`.pt` / `.pth`) | torch | YOLOv5s 权重加载示例 |
 | [python_tflite](python_tflite/) | TensorFlow Lite (`.tflite`) | tensorflow | TFLite 解释器推理（含量化提示） |
 | [python_tf_savedmodel](python_tf_savedmodel/) | TF2 SavedModel | tensorflow | SavedModel 签名推理 |

@@ -1,4 +1,6 @@
-numpy>=1.13.3  # BSD
-opencv-python==4.4.0.44
-tensorflow==1.15.4
-protobuf<3.21
+numpy>=1.26
+opencv-python-headless>=4.10
+tensorflow>=2.16
+# 注: 旧版 pin 的 tensorflow==1.15.4 / protobuf<3.21 / opencv==4.4.0.44 已移除
+# (TF1 自 2020 起无安全补丁且不支持受支持的 Python; test.py 使用 tf.compat.v1 API, 与 TF2 完全兼容)
+# opencv 使用 headless 变体: demo 仅 imread/resize/imwrite, 无需系统 libGL, 镜像无 apt 系统依赖

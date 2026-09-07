@@ -15,7 +15,7 @@
 | Directory | Model format | Runtime / framework | Description |
 |-----------|--------------|---------------------|-------------|
 | [python_onnx](python_onnx/) | ONNX (`.onnx`) | onnxruntime | Complete YOLOv5n object-detection example with NMS and visualization |
-| [python_pb](python_pb/) | TensorFlow 1.x (`.pb`) | tensorflow==1.15.4 | YOLOv3-ResNet18 object detection with a Dockerfile |
+| [python_pb](python_pb/) | TensorFlow (`.pb`) | tensorflow>=2.16 | YOLOv3-ResNet18 object detection (tf.compat.v1 frozen graph) with a Dockerfile |
 | [python_pth_pt](python_pth_pt/) | PyTorch (`.pt` / `.pth`) | torch | YOLOv5s weight-loading example |
 | [python_tflite](python_tflite/) | TensorFlow Lite (`.tflite`) | tensorflow | TFLite interpreter inference with quantization notes |
 | [python_tf_savedmodel](python_tf_savedmodel/) | TF2 SavedModel | tensorflow | SavedModel signature inference |

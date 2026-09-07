@@ -1,11 +1,7 @@
-FROM python:3.7-slim
+FROM python:3.12-slim
 
-
-RUN apt update \
-  && apt install -y libgl1-mesa-glx
-  
 COPY ./requirements.txt /home
-RUN pip install -r /home/requirements.txt
+RUN pip install --no-cache-dir -r /home/requirements.txt
 
 WORKDIR /home
 

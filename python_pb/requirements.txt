@@ -1,4 +1,4 @@
-numpy>=1.26
+numpy>=2.5.2
 opencv-python-headless>=4.10
 tensorflow>=2.16
 # 注: 旧版 pin 的 tensorflow==1.15.4 / protobuf<3.21 / opencv==4.4.0.44 已移除

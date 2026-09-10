@@ -21,7 +21,7 @@ jobs:
     - name: '导出并上传镜像工件'
       run: |
         docker save model-runntime | gzip > model-runntime-image.tar.gz
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: 'model-runntime-docker-image-${{ github.ref_name }}'
         path: 'model-runntime-image.tar.gz'

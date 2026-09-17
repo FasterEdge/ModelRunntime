@@ -17,7 +17,10 @@ INPUT_SHAPE = (1, 224, 224, 3)       # TODO: 按模型输入 shape 修改
 NUM_CLASSES = 1000                   # TODO: 按模型实际类别数修改
 
 def load_model(path):
-    return keras.models.load_model(path)
+    # safe_mode=True 阻止 Keras 反序列化任意 Lambda 层代码执行(RCE):
+    # 恶意 .h5/.keras 可在加载时通过 Lambda 层注入并执行任意 Python 代码。
+    # 仅当模型完全可信时才应显式改回 safe_mode=False。
+    return keras.models.load_model(path, safe_mode=True)
 
 def preprocess(image_path):
     import cv2

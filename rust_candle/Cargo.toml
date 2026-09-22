@@ -1,6 +1,6 @@
 [package]
 name = "rust_candle"
-version = "1.0.20260901"
+version = "1.0.20260922"
 edition = "2021"
 
 [dependencies]

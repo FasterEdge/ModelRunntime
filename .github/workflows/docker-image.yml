@@ -7,8 +7,10 @@ on:
       - main
     tags:
       - 'v*'          # 打 v0.1.0 等标签时自动构建并产出镜像
+  release:
+    types: [published, released]
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   docker-build:
@@ -27,3 +29,19 @@ jobs:
         path: 'model-runntime-image.tar.gz'
         if-no-files-found: 'warn'
         retention-days: 14
+    - name: '生成 MD5/SHA1 校验文件'
+      if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
+      run: |
+        set -euo pipefail
+        md5sum model-runntime-image.tar.gz > checksums-md5.txt
+        sha1sum model-runntime-image.tar.gz > checksums-sha1.txt
+    - name: '上传镜像包到 Release'
+      if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.event.release.tag_name || github.ref_name }}
+        files: |
+          model-runntime-image.tar.gz
+          checksums-md5.txt
+          checksums-sha1.txt
+        fail_on_unmatched_files: false

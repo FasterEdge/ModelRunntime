@@ -45,3 +45,183 @@ updates:
     labels:
       - dependencies
       - security
+  - package-ecosystem: cargo
+    directory: /rust_candle
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: cargo
+    directory: /rust_ort
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: cargo
+    directory: /rust_tract
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: gomod
+    directory: /go_tflite
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: maven
+    directory: /java_djl
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: maven
+    directory: /java_onnxruntime
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: npm
+    directory: /node_onnxruntime
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: npm
+    directory: /node_tfjs
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_caffe
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_gguf
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_jax
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_keras_h5
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_onnx
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_openvino
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_paddle
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_pth_pt
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_tensorrt
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_tf_savedmodel
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_tflite
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+  - package-ecosystem: pip
+    directory: /python_torchscript
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security

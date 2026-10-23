@@ -1,5 +1,5 @@
 numpy>=1.26
-opencv-python-headless>=4.10
+opencv-python-headless>=5.0.0.93
 tensorflow>=2.16
 # 注: 旧版 pin 的 tensorflow==1.15.4 / protobuf<3.21 / opencv==4.4.0.44 已移除
 # (TF1 自 2020 起无安全补丁且不支持受支持的 Python; test.py 使用 tf.compat.v1 API, 与 TF2 完全兼容)

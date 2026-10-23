@@ -17,6 +17,10 @@ DEVICE = "cpu"                       # TODO: 按可用设备修改
 NUM_CLASSES = 80                     # TODO: 按模型实际类别数修改
 
 def load_model(path):
+    # 安全注意: torch.jit.load 本质是 pickle 反序列化(恢复 TorchScript 模块),
+    # 无 safe_mode/weights_only 等效保护——恶意 .pt 文件可在加载时经 __reduce__
+    # 钩子执行任意代码(RCE)。与 keras_h5 的 safe_mode=True 不同, TorchScript
+    # 格式无法在不破坏功能的前提下安全加载, 仅加载完全可信的模型文件。
     model = torch.jit.load(path, map_location=DEVICE)
     model.eval()
     return model

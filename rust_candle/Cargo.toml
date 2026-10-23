@@ -4,5 +4,6 @@ version = "1.0.20261022"
 edition = "2021"
 
 [dependencies]
+<<<<<<< HEAD
 candle-core = "0.11"
-candle-nn = "0.7"
+candle-nn = "0.11"

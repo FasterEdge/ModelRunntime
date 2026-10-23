@@ -1,6 +1,6 @@
 [package]
 name = "rust_tract"
-version = "1.0.20260922"
+version = "1.0.20261022"
 edition = "2021"
 
 [dependencies]

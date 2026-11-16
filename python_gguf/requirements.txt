@@ -1,1 +1,4 @@
-llama-cpp-python>=0.3.36
+# llama-cpp-python 0.3.37 is the latest PyPI release and transitively pins
+# diskcache 5.6.3 (PYSEC-2026-2447, no fixed release as of 2026-11-16).
+# This example uses Llama, not LlamaDiskCache; do not enable attacker-writable caches.
+llama-cpp-python>=0.3.37

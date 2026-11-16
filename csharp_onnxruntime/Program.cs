@@ -39,6 +39,6 @@ class Program
 
         // TODO: 解析 results.First().AsTensor<float>()
         var output = results.First().AsTensor<float>();
-        Console.WriteLine($"output shape: [{string.Join(",", output.Dimensions)}]");
+        Console.WriteLine($"output shape: [{string.Join(",", output.Dimensions.ToArray())}]");
     }
 }

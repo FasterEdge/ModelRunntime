@@ -1,6 +1,6 @@
 module github.com/FasterEdge/ModelRunntime/go_tflite
 
-go 1.21
+go 1.27.4
 
 require github.com/mattn/go-tflite v1.0.10
 

@@ -2,13 +2,15 @@
 // 动态参数均用注释占位，按实际模型修改
 
 import ai.djl.Application;
-import ai.djl.Model;
 import ai.djl.inference.Predictor;
+import ai.djl.modality.Classifications;
 import ai.djl.modality.cv.Image;
+import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.transform.Resize;
 import ai.djl.modality.cv.transform.ToTensor;
-import ai.djl.modality.cv.translator.BaseImageTranslator;
+import ai.djl.modality.cv.translator.ImageClassificationTranslator;
 import ai.djl.repository.zoo.Criteria;
+import ai.djl.repository.zoo.ZooModel;
 import ai.djl.training.util.ProgressBar;
 
 public class Main {
@@ -18,27 +20,23 @@ public class Main {
         String modelUrl = "file:///path/to/model";  // TODO: 替换为模型 URI
         // INPUT_SIZE: 输入图像尺寸
         int width = 224, height = 224;  // TODO: 按模型输入修改
-        // NUM_CLASSES: 类别数
-        int numClasses = 1000;  // TODO: 按模型实际类别数修改
-
-        Criteria<Image, float[]> criteria = Criteria.builder()
+        Criteria<Image, Classifications> criteria = Criteria.builder()
                 .optApplication(Application.CV.IMAGE_CLASSIFICATION)
-                .setTypes(Image.class, float[].class)
+                .setTypes(Image.class, Classifications.class)
                 .optModelUrls(modelUrl)
-                .optTranslator(new BaseImageTranslator.Builder()
+                .optTranslator(ImageClassificationTranslator.builder()
                         .addTransform(new Resize(width, height))
                         .addTransform(new ToTensor())
                         .build())
                 .optProgress(new ProgressBar())
                 .build();
 
-        try (Model model = criteria.loadModel();
-             Predictor<Image, float[]> predictor = model.newPredictor()) {
+        try (ZooModel<Image, Classifications> model = criteria.loadModel();
+             Predictor<Image, Classifications> predictor = model.newPredictor()) {
             // TODO: 替换输入图片
             Image img = ImageFactory.getInstance().fromUrl("file:///example.png");
-            float[] out = predictor.predict(img);
-            // TODO: 解析 out（分类为 argmax）
-            System.out.println("inference done, output length: " + out.length);
+            Classifications out = predictor.predict(img);
+            System.out.println(out);
         }
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "node_tfjs",
-  "version": "1.0.20261116",
+  "version": "1.0.20261123",
   "main": "index.js",
   "dependencies": {
     "@tensorflow/tfjs-node": "^4.22.0"

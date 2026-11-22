@@ -81,18 +81,49 @@ python tools/gen_matrix.py --check  # 校验 matrix.json 与源码一致，不�
 ```
 
 `--check` 只校验**与工具链无关的源码事实**（未消除的 TODO、推理调用是否存在、模型格式、
-入口文件、缺失依赖清单），因此可以在 CI 里稳定运行。它有意不校验 `status` / `compile_check` /
-`evidence` 字段——这三个字段依赖本机是否装了 g++ / node / gofmt / dotnet / cargo 与 ONNX Runtime
-共享库，跨机器比对会产生假失败。想确认状态字段是否最新，跑一次
+入口文件、随仓库分发的模型文件、缺失依赖清单），因此可以在 CI 里稳定运行。它有意不校验
+`status` / `compile_check` / `evidence` 字段——这三个字段依赖本机是否装了 g++ / node /
+gofmt / dotnet / cargo 与 ONNX Runtime 共享库，跨机器比对会产生假失败；同理
+`environment`（记录本机 Python 版本）也不参与比对，换 Python 小版本不会造成假失败。
+想确认状态字段是否最新，跑一次
 `python tools/gen_matrix.py && PYTHON_BIN=<你的 venv python> python tools/verify_matrix.py`。
+
+`tools/verify_matrix.py` 也有一个 `--check`，语义与前一个不同：它**只读**，检查 `matrix.json`
+里已标记 `verified` 的用例是否都带有有效 `evidence`，不重跑、不改文件、退出码即结论。
+这样 CI 里的“检查”不会退化成“重建并顺手覆盖证据”。
+
+`evidence.command` 里的本机绝对路径在写回时会被替换成占位符（`<repo>/`、
+`<python>`、`<tmp>`、`<home>`），只保留“用哪个解释器、在哪个临时目录跑”这层信息。
+矩阵随仓库提交，写死 `C:\Users\<用户名>\...` 会让别人无法照着重跑，也把本机信息带进了
+版本库；`evidence.output_tail` 是当场实测输出的尾部，中文按 UTF-8 或本地代码页严格解码，
+不会有 U+FFFD。
+
+矩阵的静态元数据（平台、运行库、缺失依赖清单）集中在 `tools/matrix_spec.json`，
+由 `gen_matrix.py` 读取后与源码实况交叉生成；示例总数与状态计数写在 `matrix.json` 的
+`summary` 字段，可随每次重新生成实测更新。
 
 状态定义（三选一，判定规则见 `tools/gen_matrix.py` 顶部 docstring）：
 
 | 状态 | 含义 |
 |------|------|
 | `verified` | 由 `tools/verify_matrix.py` 真实构建并运行通过，命令与输出记录在 `matrix.json` 的 `evidence` 字段 |
-| `compilable` | 语法/编译检查通过（Python `py_compile` 等价语法检查、Go `gofmt -l`、JS `node --check`、C++ `g++ -fsyntax-only`），但推理调用尚未执行（缺模型或运行库） |
+| `compilable` | 语法/编译检查通过（Python `py_compile` 等价语法检查、Go `gofmt -l`、JS `node --check`、C++ `g++ -fsyntax-only`、Java `javac -cp <本地 m2 jar>`、C# `dotnet build`、Rust `cargo check --offline`），但推理调用尚未执行（缺模型或运行库） |
 | `placeholder` | 存在未消除 `TODO`，或推理调用缺失/被注释掉，或语法编译检查失败 |
+
+`compile_check` 字段如实记录每类语言的检查结果。本机（2026-11-23）实测：
+
+- Python / Go / JS：全部 `ok=true`（`ast.parse`、`gofmt -l`、`node --check`）。
+- Java：`javac -cp <本地 m2 的 onnxruntime-1.32.0.jar / djl api-0.40.0.jar>` 真实编译通过，`ok=true`；
+  两个 Java 示例仍因未消除 `TODO` 而判为 placeholder。
+- Rust：`cargo check --offline` 在 GNU toolchain 下通过（`rust_tract` / `rust_candle`）；
+  `rust_ort` 因本机缺 `link.exe` 且 `ort-sys` 无 windows-gnu 预编译产物而失败，
+  记为 `ok=false` + `skip=true`（环境缺失，不是源码语法错）。
+- C#：无 .NET SDK，记 `ok=false` + `skip=true`。
+- C++：`g++ -fsyntax-only` 因缺第三方头文件（ONNX Runtime / OpenCV / TensorRT 等）失败，
+  这正是 `missing_deps` 的证据，不加 `skip` 标记。
+
+即：`ok=false` 有两类原因——本机工具链缺失（`skip=true`）与第三方 SDK 头文件缺失（C++，`skip` 不设），
+都不是「源码语法错误」。
 
 `verified` 用例的复现方式（依赖装在示例外部的虚拟环境，不污染仓库）：
 
@@ -111,11 +142,29 @@ PYTHON_BIN=.venv/Scripts/python.exe python tools/verify_matrix.py
 
 | 示例 | 实际执行的推理 |
 |------|----------------|
-| `python_onnx` | `yolov5n.onnx` + `example2.png`，onnxruntime 10 次计时 + NMS + 画框 |
-| `python_pb` | `yolov3_resnet18.pb`（tf.compat.v1 冻结图）+ `example2.png`，TensorFlow 2.22 跑 10 次 |
+| `python_onnx` | `yolov5n.onnx` + `example2.png`，onnxruntime 10 次计时 + NMS + 画框步骤（本机实跑检测到 1 个目标、写出 `result_example2.png`，但绘制框数为 0） |
+| `python_pb` | `yolov3_resnet18.pb`（tf.compat.v1 冻结图）+ `example2.png`，TensorFlow **2.22.0-rc1（预发布版）** 跑 10 次 |
 | `python_pth_pt` | `yolov5s.pt` + `example.png`，torch 2.15 前向 + numpy NMS，输出 9 个检测框 |
 | `go_onnxruntime` | `go build` 后链接 `onnxruntime.dll`，`yolov5n.onnx` 推理并打印输出 shape |
 | `node_onnxruntime` | `onnxruntime-node` 加载 `yolov5n.onnx` 推理并打印输出 shape |
+
+> 关于 `python_pb` 的 TensorFlow 版本：`python_pb/requirements.txt` 只写了 `tensorflow>=2.21.0`，
+> 本机实跑环境解析到的是 **2.22.0-rc1**（`-rc1` 是 PyPI 上的预发布版本号），并非稳定版 2.22.0。
+> 若需稳定版，请在 requirements 里 pin `tensorflow==2.22.0` 或 `>=2.23`。
+
+### 矩阵规模
+
+`matrix.json` 的 `summary` 字段由脚本实测填写。本次实测（2026-11-23，Python 3.14.7）：
+**total=30**；只跑 `gen_matrix.py` 时为 `verified=0 / compilable=1 / placeholder=29`，
+再跑 `verify_matrix.py` 后变为 `verified=5 / compilable=0 / placeholder=25`。
+同一份源码的 `compile_check` 实测 `ok=true` 共 22 个（13 Python + 3 Go + 2 Rust + 2 Java + 2 JS），
+`skip=true` 2 个（`rust_ort` 缺 `link.exe`/无 windows-gnu 预编译、`csharp_onnxruntime` 无 .NET SDK），
+6 个 C++ 因缺第三方头文件失败（即 `missing_deps` 的证据）。
+数字会随源码与工具链变化，请以当次 `matrix.json` 的 `summary` 与 `compile_check` 为准，不要照抄本行。
+静态元数据来源：`tools/matrix_spec.json`（每个示例的平台、运行库、缺失依赖清单）。
+`bundled_models` 字段列出示例目录内实际存在、随仓库分发的模型文件（按 `FORMAT_SUFFIXES`
+大小写无关匹配，并排除 `node_modules` / `target` / `bin` / `obj` / `dist` / `__pycache__` 等产物目录）；
+该字段为空表示运行前须自行准备模型。
 
 > 本仓库**不包含** NPU 设备与厂商 SDK（CANN / RKNPU2 / SNPE / QNN / NeuroPilot / Core ML 等），
 > 其余示例只保证语法与代码结构正确，真实加速卡推理需要相应硬件与工具链，

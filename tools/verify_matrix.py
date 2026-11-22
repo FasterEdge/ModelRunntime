@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import locale
 import os
 import shutil
 import subprocess
@@ -44,17 +45,45 @@ def _venv_python() -> str:
     return sys.executable
 
 
+def decode_output(raw: bytes | None) -> str:
+    """把子进程输出解码成 str，绝不产生 U+FFFD。
+
+    Windows 上 Python / 第三方程序默认用本地代码页（cp936/GBK）写 stdout，
+    一律按 utf-8 解码会把每个中文字节变成 U+FFFD，写进 matrix.json 的
+    evidence.output_tail 后对人完全不可读。这里先按 utf-8 严格解码，
+    失败再按本地代码页解，两条都不成功才做有损替换。
+    """
+    if not raw:
+        return ""
+    text = None
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        for enc in (locale.getpreferredencoding(False), "gbk", "cp936"):
+            try:
+                text = raw.decode(enc)
+                break
+            except (UnicodeDecodeError, LookupError):
+                continue
+        if text is None:
+            text = raw.decode("utf-8", errors="replace")
+    # Windows 上是 \r\n，读回来再写 JSON 会变成 \r\r\n，统一成 \n
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def sh(argv: list[str], cwd: Path, timeout: int = 600, env_extra: dict | None = None) -> dict:
     env = dict(os.environ)
+    # 让子进程自己就用 utf-8 输出（Python 解释器读 PYTHONIOENCODING/PYTHONUTF8）
+    env.setdefault("PYTHONIOENCODING", "utf-8")
+    env.setdefault("PYTHONUTF8", "1")
     if env_extra:
         env.update(env_extra)
     try:
-        proc = subprocess.run(argv, cwd=cwd, capture_output=True, text=True,
-                              encoding="utf-8", errors="replace",
+        proc = subprocess.run(argv, cwd=cwd, capture_output=True,
                               timeout=timeout, env=env)
         return {"returncode": proc.returncode,
-                "stdout": (proc.stdout or "")[-2000:],
-                "stderr": (proc.stderr or "")[-2000:],
+                "stdout": decode_output(proc.stdout)[-2000:],
+                "stderr": decode_output(proc.stderr)[-2000:],
                 "command": " ".join(str(a) for a in argv)}
     except subprocess.TimeoutExpired:
         return {"returncode": -1, "stdout": "", "stderr": f"超时（>{timeout}s）",
@@ -62,6 +91,27 @@ def sh(argv: list[str], cwd: Path, timeout: int = 600, env_extra: dict | None = 
     except FileNotFoundError as exc:
         return {"returncode": -1, "stdout": "", "stderr": str(exc),
                 "command": " ".join(str(a) for a in argv)}
+
+
+def sanitize_command(cmd: str) -> str:
+    """把命令里的本机绝对路径换成可移植占位符。
+
+    evidence 会随 matrix.json 提交入库，写进 `D:/Projects/.../.tmp/h1venv/...`
+    或 `C:\\Users\\<name>\\AppData\\Local\\Temp\\...` 这类路径，换台机器就无法
+    照着重跑，也把本机用户名带进了仓库。占位符保留"用什么解释器/在哪个临时
+    目录跑"这层信息，同时让命令可移植。
+    """
+    for prefix, token in (
+        (str(REPO_ROOT) + os.sep, "<repo>/"),
+        (str(REPO_ROOT).replace(os.sep, "/") + "/", "<repo>/"),
+        (_venv_python(), "<python>"),
+        (tempfile.gettempdir(), "<tmp>"),
+        (tempfile.gettempdir().replace(os.sep, "/"), "<tmp>"),
+        (str(Path.home()), "<home>"),
+        (str(Path.home()).replace(os.sep, "/"), "<home>"),
+    ):
+        cmd = cmd.replace(prefix, token)
+    return cmd
 
 
 def go_env() -> dict:
@@ -216,13 +266,33 @@ CASES = {
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="驱动 verified 示例并写入证据")
-    parser.add_argument("--check", action="store_true", help="只检查，失败退出码 1")
+    parser.add_argument("--check", action="store_true",
+                        help="只检查 matrix.json 里已有证据是否成立，不重新运行、不写文件")
     args = parser.parse_args()
 
     if not MATRIX_PATH.is_file():
         print("matrix.json 不存在，先运行 python tools/gen_matrix.py", file=sys.stderr)
         return 1
     matrix = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+
+    if args.check:
+        # 只做只读校验：CLI 声明 --check 是"只检查"，就不能顺手重跑用例并覆盖
+        # matrix.json（那会让 CI 里的"检查"变成"重建"，掩盖证据过期）。
+        expected = [sid for sid in CASES if any(s["id"] == sid for s in matrix["samples"])]
+        missing = []
+        for sample in matrix["samples"]:
+            sid = sample["id"]
+            if sid not in CASES:
+                continue
+            ev = sample.get("evidence") or {}
+            if sample.get("status") != "verified" or not ev.get("verified"):
+                missing.append(sid)
+        if missing:
+            print(f"以下示例缺少有效的 verified 证据: {', '.join(missing)}", file=sys.stderr)
+            print("请运行 python tools/verify_matrix.py 真实跑一遍", file=sys.stderr)
+            return 1
+        print(f"证据校验通过（{len(expected)} 个用例已 verified，matrix.json 未被修改）")
+        return 0
 
     failures = []
     for sample in matrix["samples"]:
@@ -232,12 +302,17 @@ def main() -> int:
         case = CASES[sid]
         with tempfile.TemporaryDirectory(prefix=f"fe-verify-{sid}-") as td:
             result = case(Path(td))
-        ok = result.get("returncode", 0) == 0 and result.get("observed", 0) > 0
+        # 顶层没有 returncode 的用例（imports 成功 + 运行成功）要回落到 run.returncode，
+        # 否则 evidence 里永远写 null，“真实退出码”就没有被记录。
+        rc = result.get("returncode")
+        if rc is None:
+            rc = (result.get("run") or {}).get("returncode")
+        ok = rc == 0 and result.get("observed", 0) > 0
         sample["evidence"] = {
             "verified": ok,
-            "command": result.get("command") or result.get("run", {}).get("command", ""),
+            "command": sanitize_command(result.get("command") or result.get("run", {}).get("command", "")),
             "note": result.get("note", ""),
-            "returncode": result.get("returncode"),
+            "returncode": rc,
             "observed": result.get("observed"),
             "expected_marker": result.get("expected_marker", ""),
             "output_tail": (result.get("run") or result).get("stdout", "")[-800:],

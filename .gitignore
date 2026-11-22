@@ -56,3 +56,9 @@ temp/
 *.exe
 *.exe~
 
+
+# 构建产物 / 依赖目录（不应进仓库）
+bin/
+obj/
+target/
+node_modules/

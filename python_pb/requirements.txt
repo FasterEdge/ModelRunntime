@@ -1,5 +1,5 @@
 numpy>=2.5.5
-opencv-python-headless>=5.0.0.93
+opencv-python-headless>=5.1.0.95
 tensorflow>=2.21.0
 certifi>=2026.10.23
 idna>=3.20

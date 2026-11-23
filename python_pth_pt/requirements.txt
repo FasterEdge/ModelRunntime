@@ -6,6 +6,6 @@
 # 注：yolov5 的 utils/general.py 依赖 pkg_resources，setuptools 需 <81。
 torch>=2.9
 opencv-python>=4.10
-numpy>=2.0
+numpy>=2.5.5
 yolov5>=7.0
 setuptools<81

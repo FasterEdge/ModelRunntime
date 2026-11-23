@@ -1,5 +1,5 @@
 numpy>=2.5.5
-opencv-python>=5.0.0.93
+opencv-python>=5.1.0.95
 paddlepaddle>=3.3.1
 Pillow>=13.0.0
 certifi>=2026.10.23

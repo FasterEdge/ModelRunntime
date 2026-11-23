@@ -4,7 +4,7 @@
 #   B) pip install yolov5（test.py 会自动把 site-packages/yolov5 加入 sys.path）
 # 缺失时 test.py 会明确报错退出，不会静默返回空结果。
 # 注：yolov5 的 utils/general.py 依赖 pkg_resources，setuptools 需 <81。
-torch>=2.9
+torch>=2.15.0
 opencv-python>=4.10
 numpy>=2.0
 yolov5>=7.0

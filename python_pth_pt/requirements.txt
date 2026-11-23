@@ -8,4 +8,4 @@ torch>=2.9
 opencv-python>=4.10
 numpy>=2.0
 yolov5>=7.0
-setuptools<81
+setuptools<85
